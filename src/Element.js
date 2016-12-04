@@ -7,15 +7,20 @@ class Element extends ReactFireComponent {
   componentDidMount() {
     let component = this;
     this.refs.root.addEventListener('hold', (event)=>{
-      if (component.depth() === 0 || true) {
+      if (component.depth() === 0) {
         component.push({
           index : component.indexFromXY(event.x, event.y),
           importance : 1
         });
       }
     });
-    let dragging = false;
+    this.refs.root.addEventListener('tap', (event)=>{
+      if (component.depth() === 1) {
+        console.log('go deeper!');
+      }
+    });
     //  Drag and drop into other elements
+    let dragging = false;
     this.refs.root.addEventListener('dragone', (event)=>{
       if (component.depth() === 1) {
         dragging = true;
@@ -63,8 +68,7 @@ class Element extends ReactFireComponent {
   depth() {
     return this.props.depth || 0;
   }
-  indexFromXY(x,y) {
-    let component = this;
+  getVisibleChildren() {
     let children = [];
     if (this.state) {
       Object
@@ -85,10 +89,16 @@ class Element extends ReactFireComponent {
       return a.index - b.index;
     });
 
+
     //  filter removed children;
     children = children.filter((child)=>{
       return !child.removed;
     });
+    return children;
+  }
+  indexFromXY(x,y) {
+    let component = this;
+    let children = this.getVisibleChildren();
 
     let currentIndex;
     Array.from(component.refs.root.children).filter((child)=>{
@@ -117,32 +127,8 @@ class Element extends ReactFireComponent {
   render() {
     let component = this;
 
-    let children = [];
-    if (this.state) {
-      Object
-        .keys(this.state)
-        .map((key)=>{
-          //  collect all children that can be sorted for display
-          //  must have index and importance defined to show
-          if (!isNaN(this.state[key].index)
-          &&  !isNaN(this.state[key].importance)) {
-            //  store the childs key in the key field
-            this.state[key].key = key;
-            children.push(this.state[key]);
-          }
-          return null;
-        });
-    }
-    children.sort((a,b)=>{
-      return a.index - b.index;
-    });
-
-
-    //  filter removed children;
-    children = children.filter((child)=>{
-      return !child.removed;
-    });
-
+    let children = this.getVisibleChildren();
+    
     let elementChildren = [];
 
     makeRows(children).map((row, rowIndex)=>{
@@ -166,7 +152,12 @@ class Element extends ReactFireComponent {
         };
 
         elementChildren.push(<div className={childClasses} key={column.key} style={style}>
-          <Element url={column.key} depth={component.depth()+1} key={column.key} remove={remove} parentIndexFromXY={(x,y)=>{return component.indexFromXY(x,y);}}/>
+          <Element
+            url={column.key}
+            depth={component.depth()+1}
+            key={column.key}
+            remove={remove}
+            parentIndexFromXY={(x,y)=>{return component.indexFromXY(x,y);}}/>
         </div>);
         return null;
       });
