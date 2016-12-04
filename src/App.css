@@ -1,0 +1,50 @@
+.App {
+  position : absolute;
+  top : 0;
+  bottom : 0;
+  right : 0;
+  left : 0;
+  overflow : hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.Header
+{
+  display: flex;
+  justify-content: space-between;;
+}
+
+.Body
+{
+  flex-grow: 1;
+  position: relative;
+}
+
+.Footer
+{
+  display: flex;
+  justify-content: space-around;
+}
+
+.LeftPanel,
+.RightPanel
+{
+  z-index: 1;
+  position : absolute;
+  top : 0;
+  bottom : 0;
+  max-width: 100%;
+  overflow: scroll;
+  width : 100px;
+  background: red;
+  transition : left    0.3s ease-in-out,
+               right   0.3s ease-in-out,
+               opacity 0.3s ease-in-out;
+}
+
+.LeftPanel.Closed  { left  : -100%; opacity : 0; }
+.RightPanel.Closed { right : -100%; opacity : 0; }
+.LeftPanel.Open    { left  : 0;     opacity : 1; }
+.RightPanel.Open   { right : 0;     opacity : 1; }

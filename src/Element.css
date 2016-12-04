@@ -1,0 +1,60 @@
+.Element
+{
+  position : absolute;
+  display : flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  z-index: 0;
+}
+
+.Root .Element
+{
+  top : 8%;
+  left : 8%;
+  bottom : 8%;
+  right : 8%;
+}
+
+.Element.Root
+{
+  top : 4px;
+  left : 4px;
+  bottom : 4px;
+  right : 4px;
+}
+
+.Element:not(.Dragging)
+{
+  transition: transform 0.3s ease-in-out, z-index 1s linear;
+}
+
+.ElementChild
+{
+  position : relative;
+  width : 1px;
+  transition : flex-grow 0.3s ease-in-out, height 0.3s ease-in-out;
+}
+
+.ElementChildRowDivider
+{
+  width : 100%;
+  height : 0;
+}
+
+.NoChildren
+{
+  border-radius : 2px;
+  box-shadow: 0 0 8px #888888;
+  background: #EEEEEE;
+}
+
+.Root .Element:hover .NoChildren,
+.Root .Element.NoChildren:hover
+{
+  box-shadow: 0 0 8px #444444;
+}
+
+.Marked
+{
+  border : 1px solid red;
+}

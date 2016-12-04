@@ -1,0 +1,14 @@
+X Element component to extend ReactFireComponent
+X drag elements
+  allow Element manipulations on flattened representation in firebase
+X   create child
+X   remove child
+    move child within parent element
+  Navigate to child elements
+  BreadCrumbs interacting with state of Elements
+  Drag element into other element/up heirarchy to breadcrumbs
+  style Elements
+  animate all Element manipulations
+  make element types inside of Element and online
+  make website for dream garage
+  arrange all class content on treecharts
