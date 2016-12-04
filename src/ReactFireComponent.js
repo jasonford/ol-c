@@ -16,6 +16,10 @@ class ReactFireComponent extends Component {
         component.setState(val);
       }
     });
+
+    firebase.auth().onAuthStateChanged((user)=>{
+      component.forceUpdate();
+    });
   }
   componentWillUpdate(propUpdate, stateUpdate) {
     if (stateUpdate) {
@@ -27,9 +31,16 @@ class ReactFireComponent extends Component {
     let ref = firebase.database().ref(this.props.url);
     ref.push(value);
   }
+  update(value) {
+    let ref = firebase.database().ref(this.props.url);
+    ref.update(value);
+  }
   remove() {
     let ref = firebase.database().ref(this.props.url);
     ref.remove();
+  }
+  user() {
+    return firebase.auth().currentUser;
   }
   render() {
     return (

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactFireComponent from './ReactFireComponent';
 import './Element.css';
+import Keyboard from './Keyboard';
 import makeRows from './makeRows';
 
 class Element extends ReactFireComponent {
@@ -16,7 +17,7 @@ class Element extends ReactFireComponent {
     });
     this.refs.root.addEventListener('tap', (event)=>{
       if (component.depth() === 1) {
-        console.log('go deeper!');
+        component.props.focus(); //  will focus on this one in the context of the parent
       }
     });
     //  Drag and drop into other elements
@@ -61,6 +62,14 @@ class Element extends ReactFireComponent {
         ||  event.x < 0
         ||  event.y < 0) {
           component.props.remove();
+        }
+      }
+    });
+
+    Keyboard.onPress('.', (event)=>{
+      if (component.props.focused) {
+        if (event.pressed === 8) {
+          component.props.unfocus();
         }
       }
     });
@@ -124,12 +133,24 @@ class Element extends ReactFireComponent {
     }
     return currentIndex;
   }
+  focus(key) {
+    //  parent marking child key as viewed
+    let viewersUpdate = {};
+    viewersUpdate[this.user().uid] = key;
+    this.update({'viewers' : viewersUpdate});
+  }
   render() {
     let component = this;
 
     let children = this.getVisibleChildren();
     
     let elementChildren = [];
+
+    //  get the child that the current user is focused on
+    let focusedChild;
+    if (this.state && this.state.viewers) {
+      focusedChild = this.state.viewers[this.user().uid];
+    }
 
     makeRows(children).map((row, rowIndex)=>{
       elementChildren.push(<div className="ElementChildRowDivider" key={rowIndex}></div>);
@@ -141,6 +162,16 @@ class Element extends ReactFireComponent {
         let childClasses = "ElementChild";
         if (columnIndex === 0) {
           childClasses += " FirstInRow";
+        }
+        if (focusedChild && column.key !== focusedChild) {
+          childClasses += " AncestorChild";
+          style.height = 0; //  TODO: if focused row, go to 100% height
+          style.flexGrow = 0;
+        }
+        else if (focusedChild === column.key) {
+          childClasses += " FocusedChild";
+          style.height = '100%';
+          style.flexGrow = 1;
         }
         let remove = ()=>{
           //  remove only ever executed in parent
@@ -157,7 +188,10 @@ class Element extends ReactFireComponent {
             depth={component.depth()+1}
             key={column.key}
             remove={remove}
-            parentIndexFromXY={(x,y)=>{return component.indexFromXY(x,y);}}/>
+            parentIndexFromXY={(x,y)=>{return component.indexFromXY(x,y);}}
+            focus={()=>{component.focus(column.key)}}
+            unfocus={()=>{component.focus('')}}
+            focused={column.key === focusedChild}/>
         </div>);
         return null;
       });

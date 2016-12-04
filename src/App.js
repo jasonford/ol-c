@@ -31,7 +31,7 @@ class App extends Component {
           <AuthInfo />
         </div>
         <div className="Body"><Element url="/" /></div>
-        <div className="Footer">Footer</div>
+        <div className="Footer"></div>
       </div>
     );
   }

@@ -1,10 +1,12 @@
 X Element component to extend ReactFireComponent
 X drag elements
-  allow Element manipulations on flattened representation in firebase
+X  allow Element manipulations on flattened representation in firebase
 X   create child
 X   remove child
 X   move child within parent element
-  Navigate to child elements
+X Navigate to child elements
+X Navigate back from child elements
+  Navigate to deeper depths
   BreadCrumbs interacting with state of Elements
   Drag element into other element/up heirarchy to breadcrumbs
   style Elements
