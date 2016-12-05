@@ -16,10 +16,11 @@ class Element extends ReactFireComponent {
 
     this.refs.root.addEventListener('hold', (event)=>{
       if (catchParentInteractions()) {
+        let index = component.indexFromXY(event.x, event.y);
         component.push({
-          index : component.indexFromXY(event.x, event.y),
+          index : index,
           importance : 1
-        });
+         });
       }
     });
     this.refs.root.addEventListener('tap', (event)=>{
@@ -83,11 +84,6 @@ class Element extends ReactFireComponent {
   }
   depth() {
     return this.props.depth || 0;
-  }
-  relativeDepth() {
-    let abs = this.depth();
-    let currentDepth = 0;
-    return abs - currentDepth;
   }
   getVisibleChildren() {
     let children = [];
@@ -174,6 +170,8 @@ class Element extends ReactFireComponent {
     let elementChildren = [];
     //  get the child that the current user is focused on
     let focusedChild = this.focusedChild();
+    let currentComponentIsFocused = component.props.focused || isRoot;
+
 
     makeRows(children).map((row, rowIndex)=>{
       elementChildren.push(<div className="ElementChildRowDivider" key={rowIndex}></div>);
@@ -221,7 +219,8 @@ class Element extends ReactFireComponent {
               component.focus('');
             }}
             focused={column.key === focusedChild}
-            parentFocused={component.props.focused || isRoot}
+            parentFocused={currentComponentIsFocused}
+            parentChildFocused={!!focusedChild}
             setParentIndex={(index)=>{
               //  update a columns index
               let update = {};
@@ -244,10 +243,16 @@ class Element extends ReactFireComponent {
     }
     if (this.depth() === 0) {
       elementClasses.push("Root");
+    }        
+
+    let label;
+    if (component.props.parentFocused && !component.props.focused && !component.props.parentChildFocused) {
+      label = <div className="ElementChildLabel">{component.props.parentFocused +' '} {!component.props.focused +''}</div>;
     }
     return (
       <div className={elementClasses.join(" ")} ref="root">
         {elementChildren}
+        {label}
       </div>
     );
   }

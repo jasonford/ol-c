@@ -42,6 +42,21 @@
                height    0.3s ease-in-out;
 }
 
+.ElementChildLabel
+{
+  position : absolute;
+  top : 12%;
+  bottom : 12%;
+  right : 12%;
+  left : 12%;
+  display : flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 64px;
+  pointer-events:none;
+  z-index: 100;
+}
+
 .ElementChildRowDivider
 {
   width : 100%;
@@ -51,8 +66,8 @@
 .NoChildren
 {
   border-radius : 2px;
-  box-shadow: 0 0 8px #888888;
-  background: #EEEEEE;
+  box-shadow: 0 0 4px #888888;
+  background: whitesmoke;
 }
 
 .Root .Element:hover .NoChildren,
