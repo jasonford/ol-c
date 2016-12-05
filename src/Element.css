@@ -26,14 +26,20 @@
 
 .Element:not(.Dragging)
 {
-  transition: transform 0.3s ease-in-out, z-index 1s linear;
+  transition: transform 0.3s ease-in-out,
+              z-index   0.7s linear,
+              left      0.3s ease-in-out,
+              right     0.3s ease-in-out,
+              top       0.3s ease-in-out,
+              bottom    0.3s ease-in-out;
 }
 
 .ElementChild
 {
   position : relative;
-  width : 1px;
-  transition : flex-grow 0.3s ease-in-out, height 0.3s ease-in-out;
+  width : 0.1px;
+  transition : flex-grow 0.3s ease-in-out,
+               height    0.3s ease-in-out;
 }
 
 .ElementChildRowDivider
@@ -55,7 +61,15 @@
   box-shadow: 0 0 8px #444444;
 }
 
-.Marked
+.FocusedChild > .Element
 {
-  border : 1px solid red;
+  left : 0;
+  top : 0;
+  bottom : 0;
+  right : 0;
+}
+
+.Element.Dragging
+{
+  opacity: 0.75;
 }

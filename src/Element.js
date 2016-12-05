@@ -7,8 +7,15 @@ import makeRows from './makeRows';
 class Element extends ReactFireComponent {
   componentDidMount() {
     let component = this;
+    let catchParentInteractions = ()=>{
+      return (component.props.focused || component.depth() === 0) && !component.focusedChild();
+    }
+    let catchChildInteractions = ()=>{
+      return component.props.parentFocused && !component.props.focused;
+    }
+
     this.refs.root.addEventListener('hold', (event)=>{
-      if (component.depth() === 0) {
+      if (catchParentInteractions()) {
         component.push({
           index : component.indexFromXY(event.x, event.y),
           importance : 1
@@ -16,14 +23,14 @@ class Element extends ReactFireComponent {
       }
     });
     this.refs.root.addEventListener('tap', (event)=>{
-      if (component.depth() === 1) {
+      if (catchChildInteractions()) {
         component.props.focus(); //  will focus on this one in the context of the parent
       }
     });
     //  Drag and drop into other elements
     let dragging = false;
     this.refs.root.addEventListener('dragone', (event)=>{
-      if (component.depth() === 1) {
+      if (catchChildInteractions()) {
         dragging = true;
         component.refs.root.style.transform = 'translate(' + event.tx + 'px,'+ event.ty + 'px)';
         component.refs.root.style.zIndex = 10;
@@ -37,9 +44,9 @@ class Element extends ReactFireComponent {
         let targetY = oldbbox.top;
         dragging = false;
         //  need 2 animation frames for css to catch up for transition...
-        component.setState({
-          index : component.props.parentIndexFromXY(event.x, event.y)
-        });
+        let index = component.props.parentIndexFromXY(event.x, event.y);
+        //  update the parent's stored index for this item
+        component.props.setParentIndex(index);
 
         requestAnimationFrame(()=>{
           component.refs.root.style.display = 'hidden'; //  helps to not freak out the rendering loop
@@ -67,8 +74,8 @@ class Element extends ReactFireComponent {
     });
 
     Keyboard.onPress('.', (event)=>{
-      if (component.props.focused) {
-        if (event.pressed === 8) {
+      if (catchParentInteractions()) {
+        if (event.pressed === 8 && component.props.unfocus) {
           component.props.unfocus();
         }
       }
@@ -76,6 +83,11 @@ class Element extends ReactFireComponent {
   }
   depth() {
     return this.props.depth || 0;
+  }
+  relativeDepth() {
+    let abs = this.depth();
+    let currentDepth = 0;
+    return abs - currentDepth;
   }
   getVisibleChildren() {
     let children = [];
@@ -122,6 +134,16 @@ class Element extends ReactFireComponent {
           currentIndex = (children[index].index+children[index-1].index)/2;
         }
       }
+      //  if off to the right of previous row
+      //  place before this one
+      else if (bbox.top > y && currentIndex === undefined) {
+        if (index === 0) {
+          currentIndex = children[index].index-1;
+        }
+        else {
+          currentIndex = (children[index].index+children[index-1].index)/2;
+        }
+      }
     });
     if (currentIndex === undefined) {
       if (children.length) {
@@ -139,18 +161,19 @@ class Element extends ReactFireComponent {
     viewersUpdate[this.user().uid] = key;
     this.update({'viewers' : viewersUpdate});
   }
+  focusedChild() {
+    if (this.state && this.state.viewers) {
+      return this.state.viewers[this.user().uid];
+    }
+  }
   render() {
     let component = this;
-
+    let isRoot = this.depth() === 0; //  can get rid of most of this with relative depth...
+                                     //  relative depth would require more parent coordination than necessary for now...
     let children = this.getVisibleChildren();
-    
     let elementChildren = [];
-
     //  get the child that the current user is focused on
-    let focusedChild;
-    if (this.state && this.state.viewers) {
-      focusedChild = this.state.viewers[this.user().uid];
-    }
+    let focusedChild = this.focusedChild();
 
     makeRows(children).map((row, rowIndex)=>{
       elementChildren.push(<div className="ElementChildRowDivider" key={rowIndex}></div>);
@@ -188,10 +211,27 @@ class Element extends ReactFireComponent {
             depth={component.depth()+1}
             key={column.key}
             remove={remove}
-            parentIndexFromXY={(x,y)=>{return component.indexFromXY(x,y);}}
-            focus={()=>{component.focus(column.key)}}
-            unfocus={()=>{component.focus('')}}
-            focused={column.key === focusedChild}/>
+            parentIndexFromXY={(x,y)=>{
+              return component.indexFromXY(x,y);
+            }}
+            focus={()=>{
+              component.focus(column.key);
+            }}
+            unfocus={()=>{
+              component.focus('');
+            }}
+            focused={column.key === focusedChild}
+            parentFocused={component.props.focused || isRoot}
+            setParentIndex={(index)=>{
+              //  update a columns index
+              let update = {};
+              //  TODO update only index...
+              update[column.key] = {
+                index : index,
+                importance : column.importance
+              };
+              component.setState(update);
+            }}/>
         </div>);
         return null;
       });

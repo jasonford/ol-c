@@ -6,7 +6,8 @@ X   remove child
 X   move child within parent element
 X Navigate to child elements
 X Navigate back from child elements
-  Navigate to deeper depths
+X Navigate to deeper depths
+  Element titles rendering
   BreadCrumbs interacting with state of Elements
   Drag element into other element/up heirarchy to breadcrumbs
   style Elements
