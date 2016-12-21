@@ -44,17 +44,43 @@
 
 .ElementChildLabel
 {
+  user-select : none;
+  user-drag : none;
   position : absolute;
-  top : 12%;
-  bottom : 12%;
-  right : 12%;
-  left : 12%;
+  top : 25%;
+  bottom : 25%;
+  right : 25%;
+  left : 25%;
   display : flex;
   justify-content: center;
   align-items: center;
   font-size: 64px;
-  pointer-events:none;
   z-index: 100;
+  opacity : 0;
+  display : none;
+  pointer-events: none;
+  text-align: center;
+  font-weight: 100;
+}
+
+.NextLevel >.ElementChildLabel
+{
+  opacity : 1;
+  pointer-events: all;
+  display : flex;
+}
+
+.Label:hover
+{
+  background : rgba(0,0,0,0.1);
+  padding : 0.25em;
+  border-radius: 0.25em;
+  cursor : grab;
+}
+
+.ElementChildLabel:active > .Label
+{
+  cursor : grabbing;
 }
 
 .ElementChildRowDivider
@@ -70,8 +96,7 @@
   background: whitesmoke;
 }
 
-.Root .Element:hover .NoChildren,
-.Root .Element.NoChildren:hover
+.Element.NextLevel:hover .NoChildren
 {
   box-shadow: 0 0 8px #444444;
 }
@@ -87,4 +112,5 @@
 .Element.Dragging
 {
   opacity: 0.75;
+  pointer-events: none;
 }

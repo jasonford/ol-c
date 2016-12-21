@@ -10,10 +10,28 @@
   justify-content: space-between;
 }
 
+.MainPanel
+{
+  position : absolute;
+  top : 0;
+  bottom : 0;
+  right : 0;
+  left : 0;
+  display: flex;
+  flex-direction : column;
+  justify-content: space-between;
+  transition : left 0.3s ease-in-out;
+}
+
+.MainPanel.LeftPanelOpen
+{
+  left : 33%;
+}
+
 .Header
 {
   display: flex;
-  justify-content: space-between;;
+  justify-content: space-between;
 }
 
 .Body
@@ -32,19 +50,32 @@
 .RightPanel
 {
   z-index: 1;
-  position : absolute;
+  position : fixed;
   top : 0;
   bottom : 0;
-  max-width: 100%;
   overflow: scroll;
-  width : 100px;
-  background: red;
+  box-shadow: 0 0 8px #888888;
+  width : 33%;
   transition : left    0.3s ease-in-out,
-               right   0.3s ease-in-out,
-               opacity 0.3s ease-in-out;
+               right   0.3s ease-in-out;
 }
 
-.LeftPanel.Closed  { left  : -100%; opacity : 0; }
-.RightPanel.Closed { right : -100%; opacity : 0; }
-.LeftPanel.Open    { left  : 0;     opacity : 1; }
-.RightPanel.Open   { right : 0;     opacity : 1; }
+.RightPanel.Closed
+{
+  left : 100%;
+}
+
+.LeftPanel.Closed
+{
+  right : 100%;
+}
+
+.RightPanel.Open
+{
+  right : 67%;
+}
+
+.LeftPanel.Open
+{
+  right : 67%;
+}

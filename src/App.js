@@ -8,30 +8,58 @@ class App extends Component {
   componentWillMount() {
     this.setState({});
   }
+  componentDidMount() {
+    let component = this;
+    this.refs.left.addEventListener('touch', (event)=>{
+      event.stopPropagation();
+    });
+    this.refs.root.addEventListener('swipeleft', (event)=>{
+      component.setState({
+        left : null
+      });
+    });
+  }
+  setPanel() {
+    let component = this;
+    return (panel, content)=>{
+      let update = {};
+      update[panel] = content;
+      component.setState(update);
+    };
+  }
   render() {
     let leftPanelClass  = 'LeftPanel';
     let rightPanelClass = 'RightPanel';
+    let mainPanelClass = 'MainPanel'
 
-    if (this.state.leftPanelContent)
+    if (this.state.left) {
       leftPanelClass += ' Open';
-    else
+      mainPanelClass += ' LeftPanelOpen';
+    }
+    else {
       leftPanelClass += ' Closed';
+    }
 
-    if (this.state.rightPanelContent)
+    if (this.state.right) {
       rightPanelClass += ' Open';
-    else
+      mainPanelClass  += ' RightPanelOpen';
+    }
+    else {
       rightPanelClass += ' Closed';
+    }
 
     return (
-      <div className="App">
-        <div className={leftPanelClass}>Left Panel</div>
-        <div className={rightPanelClass}>Right Panel</div>
-        <div className="Header">
-          <BreadCrumbs />
-          <AuthInfo />
+      <div className="App" ref="root">
+        <div className={leftPanelClass} ref="left">{this.state.left}</div>
+        <div className={rightPanelClass} ref="right">{this.state.right}</div>
+        <div className={mainPanelClass}>
+          <div className="Header">
+            <BreadCrumbs />
+            <AuthInfo />
+          </div>
+          <div className="Body"><Element url="/" setPanel={this.setPanel()}/></div>
+          <div className="Footer"></div>
         </div>
-        <div className="Body"><Element url="/" /></div>
-        <div className="Footer"></div>
       </div>
     );
   }

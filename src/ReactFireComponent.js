@@ -8,36 +8,39 @@ firebase.initializeApp(credentials.firebase);
 
 class ReactFireComponent extends Component {
   componentWillMount() {
+    this.url = this.props.url;
     let component = this;
-    let ref = firebase.database().ref(this.props.url);
-    ref.on("value", (snapshot)=>{
+    this.dbref = firebase.database().ref(this.props.url);
+    this.handleDBUpdate = (snapshot)=>{
       let val = snapshot.val();
       if (val) {
         component.setState(val);
       }
-    });
+    };
+    this.dbref.on("value", this.handleDBUpdate);
 
     firebase.auth().onAuthStateChanged((user)=>{
       component.forceUpdate();
     });
   }
-  componentWillUpdate(propUpdate, stateUpdate) {
-    if (stateUpdate) {
-      let ref = firebase.database().ref(this.props.url);
-      ref.update(stateUpdate);
+  componentWillUnmount() { 
+    this.dbref.off("value", this.handleDBUpdate);
+  }
+  //  update for new url prop
+  componentWillUpdate(nextProps, nextState) {
+    if (nextProps.url !== this.props.url) {
+      let component = this;
+      this.dbref.off("value", this.handleDBUpdate);
+
+      this.dbref = firebase.database().ref(this.props.url);
+
+      this.dbref.on("value", (snapshot)=>{
+        let val = snapshot.val();
+        if (val) {
+          component.setState(val);
+        }
+      });
     }
-  }
-  push(value) {
-    let ref = firebase.database().ref(this.props.url);
-    ref.push(value);
-  }
-  update(value) {
-    let ref = firebase.database().ref(this.props.url);
-    ref.update(value);
-  }
-  remove() {
-    let ref = firebase.database().ref(this.props.url);
-    ref.remove();
   }
   user() {
     return firebase.auth().currentUser;
@@ -49,7 +52,6 @@ class ReactFireComponent extends Component {
           Firebase Data at "{this.props.url}":
         </span>
         {'\n'+JSON.stringify(this.state, null, 4)}
-      }
       </pre>
     );
   }

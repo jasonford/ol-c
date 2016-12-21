@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactFireComponent from './ReactFireComponent';
 import './Element.css';
+import ElementMetaData from './ElementMetaData';
 import Keyboard from './Keyboard';
 import makeRows from './makeRows';
 
@@ -14,31 +15,50 @@ class Element extends ReactFireComponent {
       return component.props.parentFocused && !component.props.focused;
     }
 
+    //  Drag and drop into other elements
+    let dragging = false;
+    let draggable = true;
+
+    this.refs.label.addEventListener('hold', (event)=>{
+      event.stopPropagation();
+      draggable = false;
+      //  TODO: create title editor
+      component.props.setPanel('left', <ElementMetaData key={component.props.url} url={component.props.url}/>);
+
+    });
+
+    this.refs.label.addEventListener('drop', (event)=>{
+      event.stopPropagation();
+      draggable = true;
+    });
+
     this.refs.root.addEventListener('hold', (event)=>{
       if (catchParentInteractions()) {
         let index = component.indexFromXY(event.x, event.y);
-        component.push({
+        component.dbref.push({
           index : index,
           importance : 1
          });
       }
     });
+
     this.refs.root.addEventListener('tap', (event)=>{
       if (catchChildInteractions()) {
         component.props.focus(); //  will focus on this one in the context of the parent
       }
     });
-    //  Drag and drop into other elements
-    let dragging = false;
-    this.refs.root.addEventListener('dragone', (event)=>{
-      if (catchChildInteractions()) {
+
+    this.refs.label.addEventListener('dragone', (event)=>{
+      if (catchChildInteractions() && draggable) {
+        event.preventDefault();
         dragging = true;
         component.refs.root.style.transform = 'translate(' + event.tx + 'px,'+ event.ty + 'px)';
         component.refs.root.style.zIndex = 10;
         component.refs.root.classList.add('Dragging');
       }
     });
-    this.refs.root.addEventListener("drop", (event)=>{
+
+    this.refs.label.addEventListener("drop", (event)=>{
       if (dragging) {
         let oldbbox = component.refs.root.getBoundingClientRect();
         let targetX = oldbbox.left;
@@ -77,7 +97,9 @@ class Element extends ReactFireComponent {
     Keyboard.onPress('.', (event)=>{
       if (catchParentInteractions()) {
         if (event.pressed === 8 && component.props.unfocus) {
-          component.props.unfocus();
+          requestAnimationFrame(()=>{
+            component.props.unfocus();
+          });
         }
       }
     });
@@ -155,7 +177,7 @@ class Element extends ReactFireComponent {
     //  parent marking child key as viewed
     let viewersUpdate = {};
     viewersUpdate[this.user().uid] = key;
-    this.update({'viewers' : viewersUpdate});
+    this.dbref.update({'viewers' : viewersUpdate});
   }
   focusedChild() {
     if (this.state && this.state.viewers) {
@@ -198,9 +220,11 @@ class Element extends ReactFireComponent {
           //  remove only ever executed in parent
           //  since no need to delete data immediately
           let update = {};
-          update[column.key] = component.state[column.key];
-          component.state[column.key].removed = Date.now();
-          component.setState(update);
+          update[column.key] = {
+            removed : Date.now()
+          };
+          console.log(component.dbref);
+          component.dbref.update(update);
         };
 
         elementChildren.push(<div className={childClasses} key={column.key} style={style}>
@@ -229,8 +253,9 @@ class Element extends ReactFireComponent {
                 index : index,
                 importance : column.importance
               };
-              component.setState(update);
-            }}/>
+              component.dbref.update(update);
+            }}
+            setPanel={component.props.setPanel}/>
         </div>);
         return null;
       });
@@ -243,16 +268,18 @@ class Element extends ReactFireComponent {
     }
     if (this.depth() === 0) {
       elementClasses.push("Root");
-    }        
+    }
 
-    let label;
+    let labelClasses="ElementChildLabel"
     if (component.props.parentFocused && !component.props.focused && !component.props.parentChildFocused) {
-      label = <div className="ElementChildLabel">{component.props.parentFocused +' '} {!component.props.focused +''}</div>;
+      elementClasses.push("NextLevel");
     }
     return (
       <div className={elementClasses.join(" ")} ref="root">
         {elementChildren}
-        {label}
+        <div className={labelClasses}>
+          <div className="Label" ref="label">{this.state? this.state.title || "..." : "..."}</div>
+          </div>
       </div>
     );
   }

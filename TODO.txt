@@ -7,8 +7,12 @@ X   move child within parent element
 X Navigate to child elements
 X Navigate back from child elements
 X Navigate to deeper depths
-  Element titles rendering
-  BreadCrumbs interacting with state of Elements
+X Element titles rendering
+X Open edit menu in left panel
+  Debug ElementMetaData state overwriting issue (happens when url prop changes and component is reused...)
+  have root track and share "currently open in panel" and "currently viewed in navigator" state
+  Edit element titles
+  BreadCrumbs interacting with view state of Elements
   Drag element into other element/up heirarchy to breadcrumbs
   style Elements
   animate all Element manipulations
